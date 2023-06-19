@@ -6,7 +6,7 @@ import tfx.extensions.google_cloud_ai_platform.constants as vertex_const
 import tfx.extensions.google_cloud_ai_platform.trainer.executor as vertex_training_const
 import tfx.extensions.google_cloud_ai_platform.tuner.executor as vertex_tuner_const
 
-PIPELINE_NAME = "kerasnlp-gpt2-alpaca"
+PIPELINE_NAME = "kerasnlp-gpt2-alpaca-pipeline"
 
 try:
     import google.auth  # pylint: disable=g-import-not-at-top  # pytype: disable=import-error
@@ -20,7 +20,7 @@ except ImportError:
 
 GOOGLE_CLOUD_REGION = "us-central1"
 
-GCS_BUCKET_NAME = GOOGLE_CLOUD_PROJECT + "-kerasnlp-alpaca-gpt2"
+GCS_BUCKET_NAME = f"{GOOGLE_CLOUD_PROJECT}-{PIPELINE_NAME}"
 PIPELINE_IMAGE = f"gcr.io/{GOOGLE_CLOUD_PROJECT}/{PIPELINE_NAME}"
 
 OUTPUT_DIR = os.path.join("gs://", GCS_BUCKET_NAME)
