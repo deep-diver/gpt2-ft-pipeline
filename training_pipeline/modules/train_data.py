@@ -1,9 +1,11 @@
 from typing import List
 
 import tensorflow as tf
-
+import tensorflow_transform as tft
 from tfx_bsl.tfxio import dataset_options
 from tfx.components.trainer.fn_args_utils import DataAccessor
+
+from .utils import INFO
 
 def input_fn(
     file_pattern: List[str],
