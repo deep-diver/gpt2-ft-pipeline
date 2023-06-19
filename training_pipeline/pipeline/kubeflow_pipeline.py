@@ -32,8 +32,6 @@ from tfx.dsl.experimental.latest_blessed_model_resolver import (
     LatestBlessedModelResolver,
 )
 
-from pipeline.components.WandBPusher.component import WandBPusher
-
 def create_pipeline(
     pipeline_name: Text,
     pipeline_root: Text,
