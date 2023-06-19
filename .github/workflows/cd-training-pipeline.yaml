@@ -74,7 +74,7 @@ jobs:
       working-directory: 'training_pipeline'
       run: |
         tfx pipeline create \
-          --pipeline-path vertex_runner.py \
+          --pipeline-path kubeflow_runner.py \
           --engine vertex \
           --build-image
 
@@ -82,7 +82,7 @@ jobs:
       working-directory: 'training_pipeline'
       run: |
         tfx pipeline compile \
-          --pipeline-path vertex_runner.py \
+          --pipeline-path kubeflow_runner.py \
           --engine vertex
           
     - name: 'Run TFX Training Pipeline'
