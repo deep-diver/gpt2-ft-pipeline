@@ -1,3 +1,6 @@
+pytest
 tfx
+kfp
+huggingface-hub
 keras_nlp
 regex
