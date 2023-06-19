@@ -26,7 +26,6 @@ def run():
                 "preprocessing_fn": configs.PREPROCESSING_FN,
             },
             ai_platform_training_args=configs.GCP_AI_PLATFORM_TRAINING_ARGS,
-            ai_platform_tuner_args=configs.GCP_AI_PLATFORM_TUNER_ARGS,
             ai_platform_serving_args=configs.GCP_AI_PLATFORM_SERVING_ARGS,
         )
     )
