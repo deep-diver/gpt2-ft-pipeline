@@ -87,12 +87,10 @@ jobs:
           
     - name: 'Run TFX Training Pipeline'
       working-directory: 'training_pipeline'
-      env:
-        PIPELINE_NAME: ${{ steps.branch-name.outputs.current_branch }}
       run: |
           tfx run create \
             --engine vertex \
-            --pipeline-name ${{ env.PIPELINE_NAME }} \
+            --pipeline-name kerasnlp-gpt2-alpaca-pipeline \
             --project ${{ github.event.inputs.gcpProject }} \
             --region ${{ github.event.inputs.gcpRegion }}
             
