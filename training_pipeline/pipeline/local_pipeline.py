@@ -15,6 +15,7 @@ from tfx.components import Tuner
 from tfx.components import Trainer
 from tfx.components import Evaluator
 from tfx.components import Pusher
+from tfx.components import SchemaGen
 from tfx.orchestration import pipeline
 from tfx.proto import example_gen_pb2
 
@@ -32,8 +33,6 @@ def create_pipeline(
     pipeline_root: Text,
     data_path: Text,
     modules: Dict[Text, Text],
-    hyperparameters: Dict[Text, Text],
-    eval_configs: tfma.EvalConfig,
     serving_model_dir: Text,
     metadata_connection_config: Optional[metadata_store_pb2.ConnectionConfig] = None,
 ) -> tfx.dsl.Pipeline:
@@ -41,8 +40,8 @@ def create_pipeline(
 
     input_config = example_gen_pb2.Input(
         splits=[
-            example_gen_pb2.Input.Split(name="train", pattern="train-00-*.tfrec"),
-            example_gen_pb2.Input.Split(name="eval", pattern="val-00-*.tfrec"),
+            example_gen_pb2.Input.Split(name="train", pattern="*-train.tfrecord"),
+            example_gen_pb2.Input.Split(name="eval", pattern="*-val.tfrecord"),
         ]
     )
     example_gen = ImportExampleGen(input_base=data_path, input_config=input_config)
@@ -51,14 +50,8 @@ def create_pipeline(
     statistics_gen = StatisticsGen(examples=example_gen.outputs["examples"])
     components.append(statistics_gen)
 
-    schema_gen = tfx.components.ImportSchemaGen(schema_file=schema_path)
+    schema_gen = SchemaGen(statistics=statistics_gen.outputs['statistics'])
     components.append(schema_gen)
-
-    example_validator = ExampleValidator(
-        statistics=statistics_gen.outputs["statistics"],
-        schema=schema_gen.outputs["schema"],
-    )
-    components.append(example_validator)
 
     transform_args = {
         "examples": example_gen.outputs["examples"],
@@ -68,44 +61,17 @@ def create_pipeline(
     transform = Transform(**transform_args)
     components.append(transform)
 
-    tuner = Tuner(
-        tuner_fn=modules["tuner_fn"],
-        examples=transform.outputs["transformed_examples"],
-        schema=schema_gen.outputs["schema"],
-        transform_graph=transform.outputs["transform_graph"],
-        custom_config={"hyperparameters": hyperparameters},
-    )
-    components.append(tuner)
-
     trainer_args = {
         "run_fn": modules["training_fn"],
         "transformed_examples": transform.outputs["transformed_examples"],
         "transform_graph": transform.outputs["transform_graph"],
         "schema": schema_gen.outputs["schema"],
-        "hyperparameters": tuner.outputs["best_hyperparameters"],
-        "custom_config": {"is_local": True},
     }
     trainer = Trainer(**trainer_args)
     components.append(trainer)
 
-    model_resolver = resolver.Resolver(
-        strategy_class=LatestBlessedModelResolver,
-        model=Channel(type=Model),
-        model_blessing=Channel(type=ModelBlessing),
-    ).with_id("latest_blessed_model_resolver")
-    components.append(model_resolver)
-
-    evaluator = Evaluator(
-        examples=example_gen.outputs["examples"],
-        model=trainer.outputs["model"],
-        baseline_model=model_resolver.outputs["model"],
-        eval_config=eval_configs,
-    )
-    components.append(evaluator)
-
     pusher_args = {
         "model": trainer.outputs["model"],
-        "model_blessing": evaluator.outputs["blessing"],
         "push_destination": tfx.proto.PushDestination(
             filesystem=tfx.proto.PushDestination.Filesystem(
                 base_directory=serving_model_dir
