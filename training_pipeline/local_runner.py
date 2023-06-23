@@ -26,6 +26,7 @@ def run():
                 "preprocessing_fn": configs.PREPROCESSING_FN,
             },
             serving_model_dir=SERVING_MODEL_DIR,
+            hf_pusher_args=configs.HF_PUSHER_ARGS,
             metadata_connection_config=tfx.orchestration.metadata.sqlite_metadata_connection_config(
                 METADATA_PATH
             ),

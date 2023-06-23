@@ -341,7 +341,7 @@ def deploy_model_for_hf_hub(
             model_repo_url=model_repo_url,
             model_version=model_version,
             model_version_sha=outputs["commit_id"],
-            additional_replacements=space_config["additional_replacements"]
+            additional_replacements=space_config.get("additional_replacements", None)
         )
 
         # step 2-4

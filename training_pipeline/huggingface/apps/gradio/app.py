@@ -1,25 +1,46 @@
+from typing import Text, Any, Dict, Optional
+
 import gradio as gr
-import numpy as np
 import tensorflow as tf
+import tensorflow_text
+from tensorflow.python.saved_model import tag_constants
+from huggingface_hub import Repository
 
-MODEL = None 
+local_path = "hf_model"
 
-def generate(user_input):
-    generated_txt = ""
+model_version = "$MODEL_VERSION"
+model_repo_id = "$MODEL_REPO_ID"
+model_repo_url = f"https://huggingface.co/{model_repo_id}"
 
-    return generated_txt
+def _clone_and_checkout(repo_url: str, local_path: str, version: str) -> Repository:
+    repository = Repository(
+        local_dir=local_path, clone_from=repo_url
+    )
+    repository.git_checkout(revision=version)
+    return repository
 
-with gr.Blocks() as demo:
-    gr.Markdown("## TFX auto-generated demo app for text-to-text generation")
+_ = _clone_and_checkout(model_repo_url, local_path, model_version)
+model = tf.saved_model.load(local_path, tags=[tag_constants.SERVING])
+gpt_lm_predict_fn = model.signatures["serving_default"]
 
-    input_txt = gr.Textbox()
-    output_txt = gr.Textbox()
-    gen_btn = gr.Button("Generate")
-
-    gen_btn.click(
-        generate,
-        input_txt,
-        output_txt
+def gen_text(prompt, max_length=256):
+    prompt = tf.constant(f"### Instruction:\n{prompt}\n\n### Response:\n")
+    max_length = tf.constant(max_length, dtype="int64")
+    
+    result = gpt_lm_predict_fn(
+        prompt=prompt,
+        max_length=max_length,
     )
 
-demo.launch(debug=True)
+    return result['result'].numpy().decode('UTF-8').split("### Response:")[-1].strip()
+
+with gr.Blocks() as demo:
+    instruction = gr.Textbox("Instruction")
+    output = gr.Textbox("Output", lines=5)
+
+    instruction.submit(
+        lambda prompt: gen_text(prompt),
+        instruction, output
+    )
+
+demo.launch()

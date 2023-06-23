@@ -163,3 +163,5 @@ cython_debug/
 notebooks/modules
 tfx_metadata
 tfx_pipeline_output
+hf_space
+hf_model

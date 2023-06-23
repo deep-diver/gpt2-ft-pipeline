@@ -2,14 +2,14 @@ from tensorflow import keras
 import keras_nlp
 
 def get_gpt2_model(cardinality):
-    gpt2_tokenizer = keras_nlp.models.GPT2Tokenizer.from_preset("gpt2_base_en")
+    gpt2_tokenizer = keras_nlp.models.GPT2Tokenizer.from_preset("gpt2_large_en")
     gpt2_preprocessor = keras_nlp.models.GPT2CausalLMPreprocessor.from_preset(
-        "gpt2_base_en",
-        sequence_length=512,
+        "gpt2_large_en",
+        sequence_length=256,
         add_end_token=True,
     )
     gpt2_lm = keras_nlp.models.GPT2CausalLM.from_preset(
-        "gpt2_base_en", preprocessor=gpt2_preprocessor
+        "gpt2_large_en", preprocessor=gpt2_preprocessor
     )
     
     learning_rate = keras.optimizers.schedules.PolynomialDecay(
@@ -19,7 +19,7 @@ def get_gpt2_model(cardinality):
     )
     loss = keras.losses.SparseCategoricalCrossentropy(from_logits=True)
     gpt2_lm.compile(
-        optimizer=keras.optimizers.Adam(learning_rate),
+        optimizer=keras.optimizers.AdamW(learning_rate),
         loss=loss,
         weighted_metrics=["accuracy"],
     )    

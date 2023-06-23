@@ -1,4 +1,4 @@
-from typing import Dict, Optional, Text
+from typing import Any, Dict, List, Optional, Text
 
 import tensorflow_model_analysis as tfma
 
@@ -27,6 +27,7 @@ from tfx.dsl.experimental.latest_blessed_model_resolver import (
     LatestBlessedModelResolver,
 )
 
+from pipeline.components.HFPusher.component import HFPusher
 
 def create_pipeline(
     pipeline_name: Text,
@@ -34,6 +35,7 @@ def create_pipeline(
     data_path: Text,
     modules: Dict[Text, Text],
     serving_model_dir: Text,
+    hf_pusher_args: Optional[Dict[Text, Any]],
     metadata_connection_config: Optional[metadata_store_pb2.ConnectionConfig] = None,
 ) -> tfx.dsl.Pipeline:
     components = []
@@ -70,16 +72,20 @@ def create_pipeline(
     trainer = Trainer(**trainer_args)
     components.append(trainer)
 
-    pusher_args = {
-        "model": trainer.outputs["model"],
-        "push_destination": tfx.proto.PushDestination(
-            filesystem=tfx.proto.PushDestination.Filesystem(
-                base_directory=serving_model_dir
-            )
-        ),
-    }
-    pusher = Pusher(**pusher_args)  # pylint: disable=unused-variable
-    components.append(pusher)
+    # pusher_args = {
+    #     "model": trainer.outputs["model"],
+    #     "push_destination": tfx.proto.PushDestination(
+    #         filesystem=tfx.proto.PushDestination.Filesystem(
+    #             base_directory=serving_model_dir
+    #         )
+    #     ),
+    # }
+    # pusher = Pusher(**pusher_args)  # pylint: disable=unused-variable
+    # components.append(pusher)
+    
+    hf_pusher_args["model"] = trainer.outputs["model"]
+    hf_pusher = HFPusher(**hf_pusher_args)
+    components.append(hf_pusher)    
 
     return pipeline.Pipeline(
         pipeline_name=pipeline_name,

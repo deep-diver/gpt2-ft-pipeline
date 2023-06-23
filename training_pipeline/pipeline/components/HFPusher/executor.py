@@ -106,7 +106,11 @@ class Executor(tfx_pusher_executor.Executor):
 
         space_config = exec_properties.get(_SPACE_CONFIG_KEY, None)
         if space_config is not None:
-            space_config = ast.literal_eval(space_config)
+            print(space_config)
+            try:
+                space_config = ast.literal_eval(space_config)
+            except ValueError:
+                space_config = exec_properties.get(_SPACE_CONFIG_KEY, None)
 
         additional_config = exec_properties.get(_ADDITIONAL_CONFIGS_KEY, None)
         if additional_config is not None:

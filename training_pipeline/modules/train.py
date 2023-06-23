@@ -21,8 +21,13 @@ def run_fn(fn_args: FnArgs):
         is_train=True,
         batch_size=TRAIN_BATCH_SIZE,
     )
+    
+    for data in train_dataset.take(1):
+        print(data.shape)
+        print(data.numpy())
 
-    model = get_gpt2_model(train_dataset.cardinality() * EPOCHS)
+    print(f"Cardinality: {train_dataset.cardinality()}")
+    model = get_gpt2_model(1463 * EPOCHS)
     model.fit(
         train_dataset, 
         steps_per_epoch=TRAIN_LENGTH // TRAIN_BATCH_SIZE,

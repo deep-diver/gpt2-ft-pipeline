@@ -23,7 +23,7 @@ def input_fn(
         ),
         tf_transform_output.transformed_metadata.schema,
     ).map(
-        lambda x: x['combine']
+        lambda x: tf.squeeze(x['combine'])
     ).prefetch(
         tf.data.AUTOTUNE
     )
