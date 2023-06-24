@@ -1,3 +1,4 @@
 tensorflow
 tensorflow_text
 huggingface_hub
+bingbong

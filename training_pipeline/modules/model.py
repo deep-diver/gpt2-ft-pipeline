@@ -22,6 +22,7 @@ def get_gpt2_model(cardinality):
         optimizer=keras.optimizers.AdamW(learning_rate),
         loss=loss,
         weighted_metrics=["accuracy"],
+        sampler="random"
     )    
     
     return gpt2_lm

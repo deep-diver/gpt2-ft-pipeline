@@ -21,6 +21,7 @@ That said, the assistant is practical and really does its best, and doesn’t le
 
         result = tf.strings.join([result, "### Response:\n"])
         result = tf.strings.join([result, x['output']])
+        result = tf.strings.join([result, "<|endoftext|>"])
         
         return tf.strings.join([system_prompt, result])
 
@@ -30,6 +31,7 @@ That said, the assistant is practical and really does its best, and doesn’t le
 
         result = tf.strings.join([result, "### Response:\n"])
         result = tf.strings.join([result, x['output']])
+        result = tf.strings.join([result, "<|endoftext|>"])
         
         return tf.strings.join([system_prompt, result])
 
